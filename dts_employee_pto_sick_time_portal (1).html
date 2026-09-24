@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DTS Employee PTO & Sick Time Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+  <header class="gradient-bg text-white shadow-lg sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-blue-600/30 p-2.5 rounded-xl border border-blue-400/30">
+          <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 block sm:inline">DTS Human Resources</span>
+          <h1 class="text-lg sm:text-xl font-extrabold text-white tracking-tight leading-none sm:leading-normal">Time Off Portal</h1>
+        </div>
+      </div>
+
+      <!-- Header Admin Action Button -->
+      <div class="flex items-center gap-3">
+        <button id="adminPortalBtn" onclick="openAdminModal()" class="bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white px-3.5 py-2 rounded-xl border border-slate-700 text-xs font-bold transition flex items-center gap-2 shadow-sm">
+          <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span class="hidden sm:inline">Admin Portal</span>
+          <span id="adminBadge" class="hidden bg-emerald-500 text-white text-[10px] px-1.5 py-0.5 rounded font-black uppercase">Active</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-6">
+
+    <!-- Confidential Banner -->
+    <div class="bg-blue-50/80 border border-blue-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-blue-900 shadow-sm">
+      <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <div>
+        <p class="font-bold">Confidential Employee Self-Service</p>
+        <p class="text-blue-800/90 mt-0.5">Please enter your unique 7-digit Employee ID to privately review your current PTO and Sick Time balances.</p>
+      </div>
+    </div>
+
+    <!-- Search Input Card -->
+    <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-4">
+      <div class="text-center space-y-1">
+        <h2 class="text-xl font-bold text-slate-900">Lookup Employee Balances</h2>
+        <p class="text-xs text-slate-500">Enter your Employee ID number below</p>
+      </div>
+
+      <div class="pt-2 flex flex-col sm:flex-row gap-2 max-w-lg mx-auto">
+        <div class="relative flex-grow">
+          <input type="password" id="employeeIdInput" autocomplete="off" placeholder="Employee ID (e.g. 1823819)"
+                 class="w-full bg-slate-50 text-slate-900 font-mono font-bold text-base pl-11 pr-10 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition placeholder:font-normal placeholder:font-sans placeholder:text-slate-400"
+                 onkeydown="if(event.key === 'Enter') performLookup()">
+          <svg class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 0121 9z"></path>
+          </svg>
+          <button type="button" onclick="toggleIdVisibility()" class="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600" title="Toggle Visibility">
+            <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          </button>
+        </div>
+        <button onclick="performLookup()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-7 py-3 rounded-xl transition duration-150 shadow-md shadow-blue-600/20 active:scale-95 flex items-center justify-center gap-2 text-sm">
+          <span>Lookup</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- Error Alert Container -->
+    <div id="errorContainer" class="hidden animate-fade-in max-w-lg mx-auto bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 shadow-sm flex items-start gap-3">
+      <div class="p-1.5 bg-rose-100 rounded-lg text-rose-600 mt-0.5 shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      </div>
+      <div>
+        <h4 class="font-bold text-sm text-rose-900">Record Not Found</h4>
+        <p class="text-xs text-rose-700 mt-0.5">No employee matching that ID was found. Please double-check your entry or contact HR.</p>
+      </div>
+    </div>
+
+    <!-- Employee Personal Result Display -->
+    <div id="resultCard" class="hidden animate-fade-in space-y-6">
+
+      <!-- Employee Header Badge -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-blue-600 text-white font-extrabold text-lg flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0" id="empAvatar">
+            --
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-bold text-blue-600 uppercase tracking-widest">Confidential Record</span>
+              <button onclick="toggleMaskName()" class="text-[11px] text-slate-400 hover:text-slate-600 underline">
+                (<span id="maskBtnText">Hide Name</span>)
+              </button>
+            </div>
+            <h3 id="empName" class="text-xl font-bold text-slate-900">Employee Name</h3>
+            <p class="text-xs text-slate-500 font-mono mt-0.5">EID: <span id="empIdDisplay" class="font-bold text-slate-700">******</span></p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+          <div class="bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 text-right">
+            <span class="text-[11px] text-slate-500 block">Total Combined Available</span>
+            <span id="empTotalHours" class="text-xl font-black text-slate-900 font-mono">0.00 hrs</span>
+          </div>
+          <!-- Clear / Lock Screen Button -->
+          <button onclick="clearSession()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3.5 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 border border-slate-200">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            Clear / Lock
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Grid Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+        <!-- Vacation / PTO Card -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Available PTO (Vacation)</p>
+              <h4 id="empPto" class="text-2xl font-black text-slate-900 font-mono mt-0.5">0.00</h4>
+              <p class="text-xs text-slate-500">Hours available</p>
+            </div>
+            <div class="bg-blue-50 p-2.5 rounded-xl border border-blue-100 text-blue-600">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+          </div>
+          <div class="space-y-1 pt-2 border-t border-slate-100">
+            <div class="flex justify-between text-xs text-slate-500">
+              <span>Standard Max Cap</span>
+              <span class="font-bold text-slate-700">80.0 hrs</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+              <div id="ptoProgressBar" class="bg-blue-600 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sick Available Card -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Available Sick Time</p>
+              <h4 id="empSickAvail" class="text-2xl font-black text-slate-900 font-mono mt-0.5">0.00</h4>
+              <p class="text-xs text-slate-500">Hours remaining</p>
+            </div>
+            <div class="bg-emerald-50 p-2.5 rounded-xl border border-emerald-100 text-emerald-600">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            </div>
+          </div>
+          <div class="space-y-1 pt-2 border-t border-slate-100">
+            <div class="flex justify-between text-xs text-slate-500">
+              <span>Annual Allowance</span>
+              <span class="font-bold text-slate-700">40.0 hrs</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+              <div id="sickAvailProgressBar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sick Taken Card -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Sick Time Used</p>
+              <h4 id="empSickTaken" class="text-2xl font-black text-slate-900 font-mono mt-0.5">0.00</h4>
+              <p class="text-xs text-slate-500">Hours taken YTD</p>
+            </div>
+            <div class="bg-rose-50 p-2.5 rounded-xl border border-rose-100 text-rose-600">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+          </div>
+          <div class="space-y-1 pt-2 border-t border-slate-100">
+            <div class="flex justify-between text-xs text-slate-500">
+              <span>Annual Sick Cap Used</span>
+              <span id="sickUsagePct" class="font-bold text-slate-700">0%</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+              <div id="sickTakenProgressBar" class="bg-rose-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Doughnut Chart Visual Breakdown -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+        <div>
+          <h4 class="text-sm font-bold text-slate-900">Your Time Off Breakdown</h4>
+          <p class="text-xs text-slate-500 mt-1">Comparison of available PTO, available Sick hours, and used Sick hours.</p>
+          <div class="mt-4 space-y-2 text-xs">
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
+              <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Available PTO</span>
+              <span id="chartPtoLabel" class="font-mono font-bold text-slate-800">0.00 hrs</span>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
+              <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Available Sick</span>
+              <span id="chartSickLabel" class="font-mono font-bold text-slate-800">0.00 hrs</span>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
+              <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Sick Hours Used</span>
+              <span id="chartTakenLabel" class="font-mono font-bold text-slate-800">0.00 hrs</span>
+            </div>
+          </div>
+        </div>
+        <div class="relative h-44 flex items-center justify-center">
+          <canvas id="empDoughnutChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Admin Modal (Login + Full Dashboard) -->
+  <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          <h3 class="font-bold text-base">HR Admin Management Portal</h3>
+        </div>
+        <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Step 1: Admin Password Gate -->
+      <div id="adminLoginStep" class="p-8 sm:p-12 text-center max-w-md mx-auto space-y-5 my-auto">
+        <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto border border-blue-100">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <div>
+          <h4 class="text-xl font-bold text-slate-900">Admin Authentication Required</h4>
+          <p class="text-xs text-slate-500 mt-1">Enter password to manage employee records and updates.</p>
+        </div>
+        <div class="space-y-3">
+          <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password"
+                 class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-center text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-600"
+                 onkeydown="if(event.key === 'Enter') verifyAdminPassword()">
+          <div id="adminAuthError" class="hidden text-xs text-rose-600 font-semibold">Incorrect password. Access denied.</div>
+          <button onclick="verifyAdminPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow-md text-sm">
+            Authenticate
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Full Admin Dashboard -->
+      <div id="adminDashboardStep" class="hidden flex flex-col flex-grow overflow-hidden p-6 space-y-6">
+        
+        <!-- Action Toolbar -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="openAddEmployeeModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Add Employee
+            </button>
+            <button onclick="exportDataJSON()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
+              Export JSON
+            </button>
+            <button onclick="exportDataCSV()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
+              Export CSV
+            </button>
+            <label class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold px-3 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5">
+              Import CSV
+              <input type="file" id="csvFileInput" accept=".csv" onchange="importCSV(event)" class="hidden">
+            </label>
+          </div>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button onclick="resetDatasetToDefault()" class="text-xs text-rose-600 hover:text-rose-800 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg transition border border-rose-200 font-medium">
+              Reset Default Data
+            </button>
+            <button onclick="logoutAdmin()" class="text-xs text-slate-500 hover:text-slate-800 bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg transition font-medium">
+              Log Out
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="flex items-center gap-3">
+          <input type="text" id="adminSearchInput" onkeyup="renderAdminTable()" placeholder="Search by name or Employee ID..."
+                 class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-600">
+          <span id="adminRecordCount" class="text-xs font-bold text-slate-500 whitespace-nowrap bg-slate-100 px-3 py-2 rounded-xl border border-slate-200">0 Employees</span>
+        </div>
+
+        <!-- Employee Management Table -->
+        <div class="overflow-x-auto overflow-y-auto custom-scrollbar flex-grow border border-slate-200 rounded-2xl bg-white max-h-[420px]">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
+              <tr>
+                <th class="py-3 px-4">EID</th>
+                <th class="py-3 px-4">Employee Name</th>
+                <th class="py-3 px-4 text-right">PTO Available</th>
+                <th class="py-3 px-4 text-right">Sick Available</th>
+                <th class="py-3 px-4 text-right">Sick Taken</th>
+                <th class="py-3 px-4 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody" class="divide-y divide-slate-100 font-normal">
+              <!-- Admin rows rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Add/Edit Employee Form Modal -->
+  <div id="employeeFormModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 id="formModalTitle" class="font-bold text-slate-900 text-base">Add New Employee</h3>
+        <button onclick="closeEmployeeFormModal()" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="empForm" onsubmit="saveEmployeeRecord(event)" class="space-y-3">
+        <input type="hidden" id="formOriginalEid">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Employee ID (EID)</label>
+          <input type="text" id="formEid" required placeholder="e.g. 1823819" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-600">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Full Name (Last, First)</label>
+          <input type="text" id="formName" required placeholder="e.g. Smith, John" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-600">
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">PTO (hrs)</label>
+            <input type="number" step="0.01" id="formPto" required placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-600">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Sick Avail</label>
+            <input type="number" step="0.01" id="formSickAvail" required placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-600">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Sick Taken</label>
+            <input type="number" step="0.01" id="formSickTaken" required placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-600">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeEmployeeFormModal()" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-xl text-xs transition shadow-md">Save Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="bg-white border-t border-slate-200 py-5 text-center text-xs text-slate-400">
+    <p>DTS PTO & Sick Leave Management System &bull; Confidential Portal</p>
+  </footer>
+
+  <script>
+    // INITIAL SPREADSHEET DATASET
+    const initialDataset = [
+      { eid: "1823819", name: "Acuna,Gabriel", pto: 21.58, sickAvail: 10.02, sickTaken: 8.00 },
+      { eid: "1802223", name: "AL SAADI,MOHAMMED", pto: 21.25, sickAvail: 24.00, sickTaken: 16.00 },
+      { eid: "1798173", name: "Alhalabi,Ryad", pto: 0.18, sickAvail: 3.00, sickTaken: 18.50 },
+      { eid: "1766176", name: "BENSON,SHAVON", pto: 8.05, sickAvail: 3.50, sickTaken: 36.50 },
+      { eid: "1552027", name: "Eischen,Erick", pto: 43.34, sickAvail: 8.00, sickTaken: 32.00 },
+      { eid: "1764169", name: "Flentye,Ryan", pto: 35.58, sickAvail: 8.00, sickTaken: 32.00 },
+      { eid: "1207228", name: "Guzman,Stephanie", pto: 80.00, sickAvail: 16.00, sickTaken: 24.00 },
+      { eid: "1809366", name: "Johnson,David", pto: 27.53, sickAvail: 32.00, sickTaken: 8.00 },
+      { eid: "1809144", name: "Khanmohamed,Moez", pto: 41.88, sickAvail: 8.00, sickTaken: 32.00 },
+      { eid: "1761553", name: "Kunkel,Taylor", pto: 5.83, sickAvail: 0.10, sickTaken: 39.90 },
+      { eid: "1806953", name: "Lambert,John", pto: 7.27, sickAvail: 4.50, sickTaken: 35.50 },
+      { eid: "1812668", name: "Martinez orbe,Iris", pto: 9.23, sickAvail: 0.00, sickTaken: 40.00 },
+      { eid: "1748065", name: "Pablo,Angelo", pto: 33.23, sickAvail: 0.00, sickTaken: 40.00 },
+      { eid: "1806825", name: "Perez,Matthew", pto: 7.37, sickAvail: 7.37, sickTaken: 32.63 },
+      { eid: "1798390", name: "Prange,Joshua", pto: 59.29, sickAvail: 16.00, sickTaken: 24.00 },
+      { eid: "1792124", name: "Putha,Vishnu Vardhan Reddy", pto: 46.21, sickAvail: 8.75, sickTaken: 31.25 },
+      { eid: "1800050", name: "Ramirez,Diego", pto: 52.77, sickAvail: 32.00, sickTaken: 8.00 },
+      { eid: "1820751", name: "Ricks,Colby", pto: 18.52, sickAvail: 14.15, sickTaken: 8.00 },
+      { eid: "1750910", name: "Riggin,Scott", pto: 77.51, sickAvail: 40.00, sickTaken: 0.00 },
+      { eid: "1812165", name: "Rojas,Emelita", pto: 36.58, sickAvail: 16.00, sickTaken: 24.00 },
+      { eid: "1808461", name: "Scoggins,Tr'E", pto: 50.59, sickAvail: 32.00, sickTaken: 8.00 },
+      { eid: "1700203", name: "Sealey,Nakeisha", pto: 43.23, sickAvail: 32.00, sickTaken: 8.00 },
+      { eid: "1646666", name: "Sechez,Brooklyn Nicole", pto: 22.12, sickAvail: 0.00, sickTaken: 40.00 },
+      { eid: "1793370", name: "Singh,Amrit", pto: 80.00, sickAvail: 29.25, sickTaken: 10.75 },
+      { eid: "1823666", name: "Thao,Billy", pto: 21.27, sickAvail: 17.76, sickTaken: 0.00 },
+      { eid: "1765669", name: "Thimons,Nickolaus", pto: 27.42, sickAvail: 6.00, sickTaken: 34.00 },
+      { eid: "1782740", name: "Williams,Nathaniel", pto: 1.86, sickAvail: 3.25, sickTaken: 36.75 },
+      { eid: "1828203", name: "BAIG,MIRZA SHOHEB", pto: 6.02, sickAvail: 5.03, sickTaken: 0.00 },
+      { eid: "1828204", name: "BRADFORD-WALKER,PRISCILLA L", pto: 5.84, sickAvail: 4.87, sickTaken: 0.00 }
+    ];
+
+    // State Variables
+    let employees = [];
+    let isAdminAuthenticated = false;
+    let chartInstance = null;
+    let currentEmployee = null;
+    let isNameMasked = false;
+
+    // Load Data from LocalStorage
+    function initData() {
+      const stored = localStorage.getItem('dts_pto_employees');
+      if (stored) {
+        try {
+          employees = JSON.parse(stored);
+        } catch(e) {
+          employees = [...initialDataset];
+        }
+      } else {
+        employees = [...initialDataset];
+        saveToLocalStorage();
+      }
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem('dts_pto_employees', JSON.stringify(employees));
+    }
+
+    // --- PUBLIC LOOKUP LOGIC ---
+    function toggleIdVisibility() {
+      const input = document.getElementById('employeeIdInput');
+      const eye = document.getElementById('eyeIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        eye.classList.add('text-blue-600');
+      } else {
+        input.type = 'password';
+        eye.classList.remove('text-blue-600');
+      }
+    }
+
+    function performLookup() {
+      const queryId = document.getElementById('employeeIdInput').value.trim();
+      const errorContainer = document.getElementById('errorContainer');
+      const resultCard = document.getElementById('resultCard');
+
+      if (!queryId) {
+        errorContainer.classList.remove('hidden');
+        resultCard.classList.add('hidden');
+        return;
+      }
+
+      // Exact Match Search Only
+      const match = employees.find(e => e.eid === queryId);
+
+      if (match) {
+        errorContainer.classList.add('hidden');
+        currentEmployee = match;
+        isNameMasked = false;
+        renderLookupResult(match);
+      } else {
+        resultCard.classList.add('hidden');
+        errorContainer.classList.remove('hidden');
+      }
+    }
+
+    function renderLookupResult(emp) {
+      const resultCard = document.getElementById('resultCard');
+      resultCard.classList.remove('hidden');
+
+      updateNameDisplay();
+
+      const totalAvail = emp.pto + emp.sickAvail;
+
+      document.getElementById('empIdDisplay').textContent = emp.eid;
+      document.getElementById('empTotalHours').textContent = `${totalAvail.toFixed(2)} hrs`;
+
+      document.getElementById('empPto').textContent = emp.pto.toFixed(2);
+      document.getElementById('empSickAvail').textContent = emp.sickAvail.toFixed(2);
+      document.getElementById('empSickTaken').textContent = emp.sickTaken.toFixed(2);
+
+      // Progress bars
+      const ptoPct = Math.min(100, Math.max(0, (emp.pto / 80) * 100));
+      const sickAvailPct = Math.min(100, Math.max(0, (emp.sickAvail / 40) * 100));
+      const sickTakenPct = Math.min(100, Math.max(0, (emp.sickTaken / 40) * 100));
+
+      document.getElementById('ptoProgressBar').style.width = `${ptoPct}%`;
+      document.getElementById('sickAvailProgressBar').style.width = `${sickAvailPct}%`;
+      document.getElementById('sickTakenProgressBar').style.width = `${sickTakenPct}%`;
+      document.getElementById('sickUsagePct').textContent = `${Math.round(sickTakenPct)}%`;
+
+      document.getElementById('chartPtoLabel').textContent = `${emp.pto.toFixed(2)} hrs`;
+      document.getElementById('chartSickLabel').textContent = `${emp.sickAvail.toFixed(2)} hrs`;
+      document.getElementById('chartTakenLabel').textContent = `${emp.sickTaken.toFixed(2)} hrs`;
+
+      renderChart(emp);
+      resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function updateNameDisplay() {
+      if (!currentEmployee) return;
+      const nameElem = document.getElementById('empName');
+      const avatarElem = document.getElementById('empAvatar');
+      const maskText = document.getElementById('maskBtnText');
+
+      if (isNameMasked) {
+        nameElem.textContent = "••••••••••••";
+        avatarElem.textContent = "**";
+        maskText.textContent = "Show Name";
+      } else {
+        nameElem.textContent = currentEmployee.name;
+        const initials = currentEmployee.name.split(',').map(n => n.trim()[0]).reverse().join('') || 'EM';
+        avatarElem.textContent = initials.toUpperCase();
+        maskText.textContent = "Hide Name";
+      }
+    }
+
+    function toggleMaskName() {
+      isNameMasked = !isNameMasked;
+      updateNameDisplay();
+    }
+
+    function renderChart(emp) {
+      const ctx = document.getElementById('empDoughnutChart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['PTO Available', 'Sick Available', 'Sick Taken'],
+          datasets: [{
+            data: [emp.pto, emp.sickAvail, emp.sickTaken],
+            backgroundColor: ['#3b82f6', '#10b981', '#f43f5e'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          cutout: '72%'
+        }
+      });
+    }
+
+    function clearSession() {
+      currentEmployee = null;
+      document.getElementById('employeeIdInput').value = '';
+      document.getElementById('resultCard').classList.add('hidden');
+      document.getElementById('errorContainer').classList.add('hidden');
+      document.getElementById('employeeIdInput').focus();
+    }
+
+    // --- ADMIN PORTAL LOGIC ---
+    function openAdminModal() {
+      document.getElementById('adminModal').classList.remove('hidden');
+      if (isAdminAuthenticated) {
+        document.getElementById('adminLoginStep').classList.add('hidden');
+        document.getElementById('adminDashboardStep').classList.remove('hidden');
+        renderAdminTable();
+      } else {
+        document.getElementById('adminLoginStep').classList.remove('hidden');
+        document.getElementById('adminDashboardStep').classList.add('hidden');
+        document.getElementById('adminPasswordInput').focus();
+      }
+    }
+
+    function closeAdminModal() {
+      document.getElementById('adminModal').classList.add('hidden');
+    }
+
+    function verifyAdminPassword() {
+      const pass = document.getElementById('adminPasswordInput').value;
+      const errorMsg = document.getElementById('adminAuthError');
+
+      if (pass === 'programteam') {
+        isAdminAuthenticated = true;
+        errorMsg.classList.add('hidden');
+        document.getElementById('adminPasswordInput').value = '';
+        document.getElementById('adminBadge').classList.remove('hidden');
+        document.getElementById('adminLoginStep').classList.add('hidden');
+        document.getElementById('adminDashboardStep').classList.remove('hidden');
+        renderAdminTable();
+      } else {
+        errorMsg.classList.remove('hidden');
+      }
+    }
+
+    function logoutAdmin() {
+      isAdminAuthenticated = false;
+      document.getElementById('adminBadge').classList.add('hidden');
+      closeAdminModal();
+    }
+
+    function renderAdminTable() {
+      const tbody = document.getElementById('adminTableBody');
+      const searchVal = document.getElementById('adminSearchInput').value.toLowerCase();
+      tbody.innerHTML = '';
+
+      const filtered = employees.filter(e => 
+        e.eid.toLowerCase().includes(searchVal) || e.name.toLowerCase().includes(searchVal)
+      );
+
+      document.getElementById('adminRecordCount').textContent = `${filtered.length} Employees`;
+
+      filtered.forEach(emp => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono font-bold text-slate-800">${emp.eid}</td>
+          <td class="py-3 px-4 font-semibold text-slate-900">${emp.name}</td>
+          <td class="py-3 px-4 text-right font-mono font-medium text-blue-600">${emp.pto.toFixed(2)}</td>
+          <td class="py-3 px-4 text-right font-mono font-medium text-emerald-600">${emp.sickAvail.toFixed(2)}</td>
+          <td class="py-3 px-4 text-right font-mono font-medium text-rose-600">${emp.sickTaken.toFixed(2)}</td>
+          <td class="py-3 px-4 text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <button onclick="openEditEmployeeModal('${emp.eid}')" class="p-1.5 bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 rounded-lg transition" title="Edit">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              </button>
+              <button onclick="deleteEmployee('${emp.eid}')" class="p-1.5 bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 rounded-lg transition" title="Delete">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- CRUD OPERATIONS ---
+    function openAddEmployeeModal() {
+      document.getElementById('formModalTitle').textContent = "Add New Employee";
+      document.getElementById('formOriginalEid').value = "";
+      document.getElementById('empForm').reset();
+      document.getElementById('employeeFormModal').classList.remove('hidden');
+    }
+
+    function openEditEmployeeModal(eid) {
+      const emp = employees.find(e => e.eid === eid);
+      if (!emp) return;
+
+      document.getElementById('formModalTitle').textContent = "Edit Employee Record";
+      document.getElementById('formOriginalEid').value = emp.eid;
+      document.getElementById('formEid').value = emp.eid;
+      document.getElementById('formName').value = emp.name;
+      document.getElementById('formPto').value = emp.pto;
+      document.getElementById('formSickAvail').value = emp.sickAvail;
+      document.getElementById('formSickTaken').value = emp.sickTaken;
+
+      document.getElementById('employeeFormModal').classList.remove('hidden');
+    }
+
+    function closeEmployeeFormModal() {
+      document.getElementById('employeeFormModal').classList.add('hidden');
+    }
+
+    function saveEmployeeRecord(e) {
+      e.preventDefault();
+      const origEid = document.getElementById('formOriginalEid').value;
+      const newEid = document.getElementById('formEid').value.trim();
+      const name = document.getElementById('formName').value.trim();
+      const pto = parseFloat(document.getElementById('formPto').value) || 0;
+      const sickAvail = parseFloat(document.getElementById('formSickAvail').value) || 0;
+      const sickTaken = parseFloat(document.getElementById('formSickTaken').value) || 0;
+
+      if (origEid) {
+        // Edit existing
+        const idx = employees.findIndex(emp => emp.eid === origEid);
+        if (idx !== -1) {
+          employees[idx] = { eid: newEid, name, pto, sickAvail, sickTaken };
+        }
+      } else {
+        // Add new
+        if (employees.some(emp => emp.eid === newEid)) {
+          alert('Employee ID already exists!');
+          return;
+        }
+        employees.push({ eid: newEid, name, pto, sickAvail, sickTaken });
+      }
+
+      saveToLocalStorage();
+      renderAdminTable();
+      closeEmployeeFormModal();
+
+      // Refresh public view if viewing edited employee
+      if (currentEmployee && currentEmployee.eid === origEid) {
+        performLookup();
+      }
+    }
+
+    function deleteEmployee(eid) {
+      if (confirm(`Are you sure you want to delete employee ID ${eid}?`)) {
+        employees = employees.filter(e => e.eid !== eid);
+        saveToLocalStorage();
+        renderAdminTable();
+        if (currentEmployee && currentEmployee.eid === eid) {
+          clearSession();
+        }
+      }
+    }
+
+    function resetDatasetToDefault() {
+      if (confirm("Reset all employee records back to the original spreadsheet data? Any manual edits will be overwritten.")) {
+        employees = JSON.parse(JSON.stringify(initialDataset));
+        saveToLocalStorage();
+        renderAdminTable();
+        clearSession();
+      }
+    }
+
+    // --- IMPORT / EXPORT LOGIC ---
+    function exportDataJSON() {
+      const blob = new Blob([JSON.stringify(employees, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dts_pto_export_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportDataCSV() {
+      let csv = "Employee ID,Employee Name,Available PTO,Available Sick,Sick Taken\n";
+      employees.forEach(e => {
+        csv += `"${e.eid}","${e.name.replace(/"/g, '""')}",${e.pto},${e.sickAvail},${e.sickTaken}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dts_pto_export_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importCSV(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const text = evt.target.result;
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        
+        let addedCount = 0;
+        lines.forEach((line, index) => {
+          if (index === 0 && line.toLowerCase().includes('employee')) return; // Skip Header
+          const cols = line.split(',').map(c => c.replace(/^["']|["']$/g, '').trim());
+          if (cols.length >= 5) {
+            const eid = cols[0];
+            const name = cols[1];
+            const pto = parseFloat(cols[2]) || 0;
+            const sickAvail = parseFloat(cols[3]) || 0;
+            const sickTaken = parseFloat(cols[4]) || 0;
+
+            const existingIdx = employees.findIndex(emp => emp.eid === eid);
+            if (existingIdx !== -1) {
+              employees[existingIdx] = { eid, name, pto, sickAvail, sickTaken };
+            } else {
+              employees.push({ eid, name, pto, sickAvail, sickTaken });
+            }
+            addedCount++;
+          }
+        });
+
+        saveToLocalStorage();
+        renderAdminTable();
+        alert(`Successfully imported/updated ${addedCount} employee records.`);
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    }
+
+    // Initialize application on load
+    window.addEventListener('DOMContentLoaded', () => {
+      initData();
+    });
+  </script>
+</body>
+</html>
